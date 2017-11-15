@@ -89,9 +89,9 @@ Function Invoke-PesterWatcher {
         if([ChangeSerializer]::Instance -ne $null){
             [ChangeSerializer]::listening = $false
             [ChangeSerializer]::Instance.Dispose();
-            Get-Job | Stop-Job
-            Get-Job | Remove-Job
-            Get-EventSubscriber -Force | Unregister-Event -Force
+            Get-Job | Where-Object {$_.Name -eq 'FileCreated' -or $_.Name -eq 'FileChanged'} | Stop-Job | Out-Null
+            Get-Job | Where-Object {$_.Name -eq 'FileCreated' -or $_.Name -eq 'FileChanged'} | Remove-Job | Out-Null
+            Get-EventSubscriber -Force  | Where-Object { $_.SourceIdentifier -eq 'FileChanged' -or $_.SourceIdentifier -eq 'FileCreated' } | Unregister-Event -Force | Out-Null
         }
         # In the following line, you can change 'IncludeSubdirectories to $true if required.                           
         $fsw = New-Object IO.FileSystemWatcher $watchFolder, $filter -Property @{IncludeSubdirectories = $true; NotifyFilter = [IO.NotifyFilters]'FileName, LastWrite'} 
